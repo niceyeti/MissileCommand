@@ -29,3 +29,6 @@
 !/GameFramework/*.config
 #re include the csproj file
 !/GameFramework/*.csproj
+
+#re include the entire Release folder. I will manually updated this with updated, self-contained executable releases.
+!/Releases

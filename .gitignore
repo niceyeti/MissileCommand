@@ -1,0 +1,31 @@
+#ignore everything, then define inclusions below
+*.exe
+*.config
+*.log
+*.cache
+*.dll
+*.pdb
+*.user
+*.suo
+*.xnb
+*.xml
+*.manifest
+
+#missile command assembly stuff
+/MissileCommand/obj
+#ignore all sprite stuff (sounds, etc)
+/MissileCommand/Content
+#re-include sprite images. This is the only secondary data I want in the repo, so I don't have to recreate sprite junk...
+!/MissileCommand/Content/Images
+#re-include app.config of this assembly
+!/MissileCommand/app.config
+# re-include csproj file for this assembly
+!/MissileCommand/*.csproj
+
+#GameFramework stuff
+/GameFramework/obj
+/GameFramework/bin
+#re include this assembly's config
+!/GameFramework/*.config
+#re include the csproj file
+!/GameFramework/*.csproj

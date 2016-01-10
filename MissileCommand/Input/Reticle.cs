@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,9 +51,6 @@ namespace MissileCommand.Input
         _mouse = new MouseDevice();
       }
 
-      //_eyeData = new List<EyeDatum>();
-      //_filter = new EyeSensorFilter();
-      //_tmr = new Timer();
       _resourcePath = resourcePath;
       _textureLoader = textureFlyweight;
       _width = 30;

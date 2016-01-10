@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;

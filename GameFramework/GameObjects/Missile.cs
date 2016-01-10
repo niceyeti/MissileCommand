@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -111,7 +113,7 @@ namespace MissileCommand.GameObjects
     {
       _health = 0;
       //spawn explosion??? or let model do it
-      Console.WriteLine("EXPLOSION at " + _particle.position.X + ":" + _particle.position.Y);
+      //Console.WriteLine("EXPLOSION at " + _particle.position.X + ":" + _particle.position.Y);
       //fire callback to notify any observers of detonation
       if (OnDetonation != null)
       {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,16 +26,17 @@ namespace MissileCommand
     GameModel _gameModel;
     EventBus _eventBus;
     TimerQueue _timerQ;
-    //IGameViewFramework gameView;
     EventFactory _eventFactory;
+    string _level1Path = @"\Level1.xml";
+    string _levelRootFolder = Environment.CurrentDirectory+"\\Levels";
 
     public GameController(EventBus eventBus, GameModel model, EventFactory factory, IGameViewFramework viewFramework)
     {
       _gameModel = model;
       _eventBus = eventBus;
       _timerQ = new TimerQueue(eventBus);
-      //gameView = iview;
       _eventFactory = factory;
+      _level1Path = _levelRootFolder + _level1Path;
 
       //TODO: setting these could be moved outside this constructor. This object needs no persistent reference to view.
       viewFramework.SetKeyboardInputHandler(OnKeyboardInput);
@@ -70,8 +73,8 @@ namespace MissileCommand
     /// </summary>
     void _tick()
     {
-      //Yes, time tick'ing is an internal property of the game framework, not actuated from outside. Remember
-      //the desire is to have the game framework behave as a completely independent game implementation, whereas the
+      //Yes, time tick'ing is an internal property of the game framework, not actuated from outside.
+      //The desire is to have the game framework behave as a completely independent game implementation, whereas the
       //view is simply passive. So time must be defined here, within the game model, not as a public function (eg, 'Tick()').
       //Many kinematic properties of the game and other time-based parameters are also dependent on this time definition.
       System.Threading.Thread.Sleep((int)GameParameters.REFRESH_RATE_MS);
@@ -80,34 +83,34 @@ namespace MissileCommand
       //pump the event queue
       _eventBus.ProcessAll();
     }
-    
-    //Loads up the timerQ with all pending game events (missiles, bombers, etc)
-    //TODO: Move to Model?
-    void _initializeTimedEventQ()
-    {
-      int spawnTimeout_ms;
 
-      //init a few missiles as initial wave in the first few seconds, with no spawn timeout
-      for (int i = 0; i < 5; i++)
+    void _initializeTimedEventQ(Level level)
+    {
+      int i, spawnTimeout_ms;
+
+      //start by emptying the queue; it should never be full in this context
+      _timerQ.Clear();
+
+      //init five missiles as initial wave in the first few seconds, with no spawn timeout
+      for (i = 0; i < 5; i++)
       {
         spawnTimeout_ms = RandomNumberGenerator.Instance.Rand() % 1500;
         EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjects());
         TimedEvent timedMissile = new TimedEvent(spawnTimeout_ms, missileEvent);
         _timerQ.Insert(timedMissile);
       }
-      //_timerQ.Print();
+
       //make 20 missiles, injected at random intervals, with a min separation of some sort
-      for (int i = 0; i < 20; i++)
+      for (i = 0; i < level.NumMissiles; i++)
       {
         spawnTimeout_ms = RandomNumberGenerator.Instance.Rand() % GameParameters.LEVEL_DURATION_MS;
         EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjects());
         TimedEvent timedMissile = new TimedEvent(spawnTimeout_ms, missileEvent);
         _timerQ.Insert(timedMissile);
       }
-      //_timerQ.Print();
 
-      //the final wave at the end of the level
-      for (int i = 0; i < 6; i++)
+      //the final wave of missiles at the end of the level
+      for (i = 0; i < 5; i++)
       {
         spawnTimeout_ms = GameParameters.LEVEL_DURATION_MS + RandomNumberGenerator.Instance.Rand() % 1500;
         EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjects());
@@ -115,8 +118,8 @@ namespace MissileCommand
         _timerQ.Insert(timedMissile);
       }
 
-      //some mirvs. what the hey.
-      for (int i = 0; i < 6; i++)
+      //some mirvs at the end
+      for (i = 0; i < level.NumMirvs; i++)
       {
         spawnTimeout_ms = GameParameters.LEVEL_DURATION_MS + 1500 + RandomNumberGenerator.Instance.Rand() % 1500;
         EventPacket mirvEvent = _eventFactory.MakeRandomSpawnMirvEventPacket(_gameModel.GetGameObjects());
@@ -124,32 +127,53 @@ namespace MissileCommand
         _timerQ.Insert(timedMirv);
       }
 
-      //spawn some bombers
-      for (int i = 0; i < 3; i++)
+      //spawn the bombers
+      for (i = 0; i < level.NumBombers; i++)
       {
         spawnTimeout_ms = RandomNumberGenerator.Instance.Rand() % GameParameters.LEVEL_DURATION_MS;
-        EventPacket bomberSpawn = _eventFactory.MakeSpawnBomberEventPacket(new Position(0,GameParameters.BOMBER_ALTITUDE));
+        EventPacket bomberSpawn = _eventFactory.MakeSpawnBomberEventPacket(new Position(0, GameParameters.BOMBER_ALTITUDE));
         TimedEvent timedBomber = new TimedEvent(spawnTimeout_ms, bomberSpawn);
         _timerQ.Insert(timedBomber);
       }
+
+      //spawn the deathheads
+      for (i = 0; i < level.NumDeathheads; i++)
+      {
+        spawnTimeout_ms = RandomNumberGenerator.Instance.Rand() % GameParameters.LEVEL_DURATION_MS;
+        EventPacket deathheadSpawn = _eventFactory.MakeSpawnBomberEventPacket(new Position(0, GameParameters.BOMBER_ALTITUDE));
+        TimedEvent timedDeathhead = new TimedEvent(spawnTimeout_ms, deathheadSpawn);
+        _timerQ.Insert(timedDeathhead);
+      }
+    }
+
+    /// <summary>
+    /// Loads a level by constructing a level object and using it to re-initialize
+    /// the TimedEventQ, the primary driver of the game.
+    /// </summary>
+    /// <param name="levelPath"></param>
+    void _loadLevel(string levelPath)
+    {
+      Level _level = new Level(levelPath);
+      _initializeTimedEventQ(_level);
     }
 
     /*
      Loads a level or other schema describing the initial state of a level.
      * TODO Input: a Level object, describing level state, difficulty, etc.
      */
-    void initialize()
+    void _initialize()
     {
       //init start up objects and state: bases, ammo, etc. Must be done before timerQ.
       _gameModel.Initialize();
       //must be done after model init
-      _initializeTimedEventQ();
+      //_initializeTimedEventQ();
+      _loadLevel(_level1Path);
     }
 
     //run forever
     public void Run()
     {
-      initialize();
+      _initialize();
 
       while (!_exit)
       {

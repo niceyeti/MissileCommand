@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 
 namespace MissileCommand
 {

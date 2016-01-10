@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -87,28 +89,10 @@ namespace MissileCommand.GameObjects
       }
     }
 
-    void _killSprite()
-    {
-      GameSpriteUpdateData updateData = new GameSpriteUpdateData(this.Center, 0.0);
-      updateData.IsAlive = false;
-      _sprite.Update(updateData);
-    }
-
     public override bool IsFriend(IGameObject other)
     {
       return other.MyType == ObjectType.TURRET_SHOT || other.MyType == ObjectType.CITY || other.MyType == ObjectType.TURRET || other.MyType == ObjectType.CURSOR || other.MyType == ObjectType.AIR_BURST;
     }
-
-    /*
-    override void _move()
-    {
-      Particle.Update(_particle);
-      _sprite.Update(new GameSpriteUpdateData(this._particle.position, 1.0));
-      GameSpriteUpdateData updateData = new GameSpriteUpdateData(this.Center, 1.0);
-      updateData.IsAlive = _health > 0;
-      _sprite.Update(updateData);
-    }
-    */
 
     /// <summary>
     /// These allow the missile to notify observers of detonation, allowing

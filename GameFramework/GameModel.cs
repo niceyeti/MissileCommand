@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System.Threading;
 using System.Linq;
 using MissileCommand.GameObjects;
 using MissileCommand.Kinematics;

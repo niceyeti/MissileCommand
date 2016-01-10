@@ -1,4 +1,6 @@
-﻿namespace MissileCommand.GameObjects
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+namespace MissileCommand.GameObjects
 {
   public enum ObjectType
   {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -81,7 +83,7 @@ namespace MissileCommand.Input
 
       //call the coordinate-average method, about the simplest method
       Vector2 estimate =  _coordinateAverageMethod(3, eyeData);
-      // regression/predictive method
+      // regression/predictive or dy/dx method
       // ...
 
       return estimate;
@@ -91,6 +93,7 @@ namespace MissileCommand.Input
     {
       int i;
       float mu_x = 0, mu_y = 0;
+      //float denom = 0, weight;
 
       //tapered/weighted average of x and y coordinates over last k inputs
       for (i = 0; i < cacheWindow && i < eyeData.Count; i++)
@@ -99,10 +102,14 @@ namespace MissileCommand.Input
         mu_x += (float)eyeData[i].MouseData.X;
         mu_y += (float)eyeData[i].MouseData.Y;
         //weighted summation
-        //mu_x += ((float)eyeData[(int)i].MouseData.X / (i + 1));
-        //mu_y += ((float)eyeData[(int)i].MouseData.Y / (i + 1));
+        //weight = (float)i + 1;
+        //mu_x += ((float)eyeData[i].MouseData.X / weight);
+        //mu_y += ((float)eyeData[i].MouseData.Y / weight);
+        //accumulate the denominator, since it isn't just i
+        //denom += weight;
       }
 
+      //return new Vector2(mu_x / denom, mu_y / denom);
       return new Vector2(mu_x / (float)i, mu_y / (float)i);
     }
 
@@ -122,8 +129,7 @@ namespace MissileCommand.Input
       double triggerThreshold = 1000;
       double stdXyProduct = StDevXyProduct(activeRadius, eyeData);
 
-      Console.WriteLine("stdevxy:" + stdXyProduct);
-
+      //Console.WriteLine("stdevxy:" + stdXyProduct);
       isClicked = stdXyProduct <= triggerThreshold;
 
       return isClicked;

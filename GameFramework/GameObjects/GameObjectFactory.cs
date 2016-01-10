@@ -1,4 +1,6 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -90,7 +92,7 @@ namespace MissileCommand
     }
 
     /*
-     * TODO: MOve this up a level, pass particle into fact
+     * TODO: Move this up a level, pass particle into fact
     Bomber start vectors aren't very random, they start at relatively the same altitude,
     and all proceed from left to right across the screen at slow speed.
      */

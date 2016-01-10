@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System.Collections.Generic;
 using MissileCommand.Interfaces;
 
 namespace MissileCommand

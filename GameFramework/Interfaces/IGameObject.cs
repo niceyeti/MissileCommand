@@ -1,4 +1,6 @@
-﻿using MissileCommand.Kinematics;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using MissileCommand.Kinematics;
 using MissileCommand.GameObjects;
 
 namespace MissileCommand.Interfaces

@@ -1,10 +1,11 @@
-﻿using System;
+﻿/* Copyright (c) 2015-2016 Jesse Waite */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MissileCommand.EventSystem;
-
 
 namespace MissileCommand.TimedEventQueue
 {
@@ -30,6 +31,14 @@ namespace MissileCommand.TimedEventQueue
     {
       _eventBus = eventBus;
       _Q = new List<TimedEvent>();
+    }
+
+    /// <summary>
+    /// Empty the Q.
+    /// </summary>
+    public void Clear()
+    {
+      _Q.Clear();
     }
 
     /*

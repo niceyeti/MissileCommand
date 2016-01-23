@@ -92,6 +92,19 @@ namespace MissileCommand
       return turretShotSprite;
     }
 
+    /// <summary>
+    /// This is a special case for some view animations, which need a nice default encapsulation
+    /// of a sprite, but must refer to it by its direct interface. The sprite is not placed
+    /// in the pool of sprites corresponding to game objects.
+    /// </summary>
+    /// <returns></returns>
+    public ExplosionSprite MakeAnimationExplosionSprite()
+    {
+      ExplosionSprite sprite = new ExplosionSprite(_explosionImgPath, _explosionSoundPath, (int)GameParameters.MAX_MISSILE_EXPLOSION_RADIUS, (int)GameParameters.MAX_MISSILE_EXPLOSION_RADIUS, _textureFlyweight);
+      sprite.HasTransparency = true;
+      return sprite;
+    }
+
     public IGameSprite MakeExplosionSprite()
     {
       ExplosionSprite sprite = new ExplosionSprite(_explosionImgPath, _explosionSoundPath, (int)GameParameters.MAX_MISSILE_EXPLOSION_RADIUS, (int)GameParameters.MAX_MISSILE_EXPLOSION_RADIUS, _textureFlyweight);

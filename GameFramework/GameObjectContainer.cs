@@ -17,9 +17,14 @@ namespace MissileCommand
       idCounter = 0;
     }
 
-    public void SetObjects(List<IGameObject> objectList)
+    public void Clear()
     {
       objects.Clear();
+    }
+
+    public void SetObjects(List<IGameObject> objectList)
+    {
+      this.Clear();
       objects = objectList;
     }
 

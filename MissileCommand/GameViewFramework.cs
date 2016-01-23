@@ -1,16 +1,14 @@
 ﻿/* Copyright (c) 2015-2016 Jesse Waite */
 
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Content;
 using System.Threading;
+using System.Collections.Generic;
 using MissileCommand.Kinematics;
-using MissileCommand.MonoSprites;
+using MissileCommand.Interfaces;
 using MissileCommand.Input;
+using MissileCommand.Menus;
 
 namespace MissileCommand
 {
@@ -22,6 +20,10 @@ namespace MissileCommand
     GraphicsDeviceManager _graphics;
     SpriteBatch _spriteBatch;
     Texture2D _background;
+    GameOverMenu _gameOverMenu;
+    LevelMenu _levelMenu;
+    MainMenu _mainMenu;
+    IMenu _currentMenu;
     //TODO: appropriate place for reticle and other input based sprites? In game model, our in view?
     //The cursor input runs on the view thread, so I'd argue the object belongs here, even though it smells like a GameObject.
     IReticle _reticle;
@@ -50,9 +52,16 @@ namespace MissileCommand
       //block, requiring ContentManager to be initialized before permitting access to factory
       _contentManagerWaitHandle.WaitOne();
 
-      _gameSpriteFactory = new ViewSpriteFactory(_gameSpriteContainer,_textureFlyweight);
+      if (_gameSpriteFactory == null)
+      {
+        _gameSpriteFactory = new ViewSpriteFactory(_gameSpriteContainer, _textureFlyweight);
+        //create the menus, which just persist in the background. These require the sprite factory, so must be done here
+        _gameOverMenu = new GameOverMenu(_textureFlyweight, _gameSpriteFactory, "Fonts/BannerFont", "Fonts/ButtonFont");
+        _levelMenu = new LevelMenu(_textureFlyweight, _gameSpriteFactory, "Fonts/ScoreFont");
+        _mainMenu = new MainMenu(_textureFlyweight, "Fonts/BannerFont", "Fonts/ButtonFont", "Images/MainMenu");
+      }
 
-      return (IGameSpriteFactory)_gameSpriteFactory;
+      return _gameSpriteFactory;
     }
 
     /// <summary>
@@ -124,7 +133,7 @@ namespace MissileCommand
     {
       //wake up any thread waiting for the ContentManager to initialize
       _contentManagerWaitHandle.Set();
-      
+
       // TODO: use this.Content to load your game content here
       _background = this.Content.Load<Texture2D>("Images/Background");
     }
@@ -153,16 +162,44 @@ namespace MissileCommand
       _onKeyboardEvent = onKeyboardEvent;
     }
 
+    /// <summary>
+    /// Blocks the calling model thread until menu display completes.
+    /// </summary>
+    /// <param name="gameObjects"></param>
+    /// <param name="score"></param>
+    public void OnLevelCompletion(List<IGameObject> gameObjects, int score)
+    {
+      //TODO: lock the current menu
+      _currentMenu = _levelMenu;
+      //blocks until menu wakes caller
+      _levelMenu.Show(gameObjects,score);
+    }
+
+    /// <summary>
+    /// Blocks the calling thread until animation completes, and user selects retry/quit.
+    /// </summary>
+    /// <param name="finalScore"></param>
+    /// <param name="userWon"></param>
+    public bool OnGameOver(int finalScore, bool userWon)
+    {
+      //TODO: lock the current menu
+      _currentMenu = _gameOverMenu;
+      //blocking
+      return _gameOverMenu.Show(finalScore,userWon);
+    }
+
     bool _isActiveRegion(int x, int y)
     {
       return x < _screenDimension.X && y < _screenDimension.Y;
     }
-    
+
     void _handleUserInput()
     {
       //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
       if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+      {
         Exit();
+      }
 
       _mouseState = _reticle.GetMouseState();
       if (_mouseState.LeftButton == ButtonState.Pressed && _isActiveRegion(_mouseState.X, _mouseState.Y))
@@ -178,6 +215,12 @@ namespace MissileCommand
           else
           {
             throw new System.Exception("ERROR OnMouseEvent handler not set in GameViewFramework._handleUserInputs()");
+          }
+
+          //notify the menu of mouse left-click as well
+          if (_currentMenu != null && _currentMenu.IsShown())
+          {
+            _currentMenu.OnClick(_mouseState.Position);
           }
         }
       }
@@ -196,7 +239,7 @@ namespace MissileCommand
         }
       }
     }
-    
+
     /// <summary>
     /// Allows the game to run logic such as updating the world,
     /// checking for collisions, gathering input, and playing audio.
@@ -214,6 +257,12 @@ namespace MissileCommand
 
     /// <summary>
     /// This is called when the game should draw itself.
+    /// 
+    /// Note how this model doesn't seem amenable to menus and the like,
+    /// since a menu should only need to dra itself once, then wait for user input,
+    /// rather than redrawing itself over and over in the background. For now, menus
+    /// must obey the same drawing model as the game, and will be passively re-drawn
+    /// while waiting for user input.
     /// </summary>
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Draw(GameTime gameTime)
@@ -222,7 +271,7 @@ namespace MissileCommand
       GraphicsDevice.Clear(Color.CornflowerBlue);
 
       _spriteBatch.Begin();
-      
+
       //draw the background
       _spriteBatch.Draw(_background, new Rectangle(0, 0, (int)_screenDimension.X, (int)_screenDimension.Y), Color.White);
 
@@ -231,8 +280,7 @@ namespace MissileCommand
       {
         try
         {
-          IViewSprite sprite = _gameSpriteContainer.GetAt(i);
-          sprite.Draw(_spriteBatch,Content);
+          _gameSpriteContainer.GetAt(i).Draw(_spriteBatch, Content);
         }
         catch (System.Exception e)
         {
@@ -240,9 +288,14 @@ namespace MissileCommand
         }
       }
 
+      if (_currentMenu != null && _currentMenu.IsShown())
+      {
+        _currentMenu.Draw(_spriteBatch, Content);
+      }
+
       //draw reticle last
       _reticle.Draw(_spriteBatch, Content);
-
+      
       _spriteBatch.End();
 
       base.Draw(gameTime);

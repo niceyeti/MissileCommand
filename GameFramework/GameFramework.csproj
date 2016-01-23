@@ -105,7 +105,8 @@
     <Compile Include="GameObjectContainer.cs" />
     <Compile Include="Interfaces\IGameObject.cs" />
     <Compile Include="GameModel.cs" />
-    <Compile Include="Level.cs" />
+    <Compile Include="Levels\Level.cs" />
+    <Compile Include="Levels\MatchManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomNumberGenerator.cs" />
     <Compile Include="TimedEventQueue\TimerQueue.cs" />
@@ -133,6 +134,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Levels\Level1.xml" />
+    <Content Include="Levels\Level2.xml" />
+    <Content Include="Levels\Level3.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

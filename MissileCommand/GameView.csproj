@@ -52,6 +52,10 @@
     <Compile Include="Input\IMouseDevice.cs" />
     <Compile Include="Input\IReticle.cs" />
     <Compile Include="Input\RingBuffer.cs" />
+    <Compile Include="Menus\GameOverMenu.cs" />
+    <Compile Include="Menus\IMenu.cs" />
+    <Compile Include="Menus\LevelMenu.cs" />
+    <Compile Include="Menus\MainMenu.cs" />
     <Compile Include="MonoSprites\AirBurstSprite.cs" />
     <Compile Include="MonoSprites\ExplosionSprite.cs" />
     <Compile Include="GameSpriteContainer.cs" />

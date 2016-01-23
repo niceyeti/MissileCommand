@@ -63,6 +63,11 @@ namespace MissileCommand.GameObjects
       _sprite = gameSprite;
     }
 
+    public int GetAmmoCount()
+    {
+      return _ammunition;
+    }
+
     public bool HasAmmo()
     {
       return _ammunition > 0;

@@ -17,6 +17,7 @@ namespace MissileCommand
    sprite textures, reference by their resource-path string. It also provides the service
    of making texture white-pixels transparent on load, but note that as a result the textures
    remain this way for their lifetime.
+   * 
    */
   public class SpriteLoaderFlyweight
   {

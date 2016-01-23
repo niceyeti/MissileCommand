@@ -55,12 +55,20 @@ namespace MissileCommand
         _clean();
     }
 
-    //TODO: pass in an initial-state object of some kind (xml, etc)
+    /// <summary>
+    /// Clears all previous objects in the model, and re-initializes it with some initial set
+    /// of objects, each in their initial state.
+    /// 
+    /// TODO: pass in an initial-state object of some kind (xml, etc)
+    /// </summary>
     public void Initialize()
     {
       //this offset is used to init a layout like original MissileCommand:  turret - city city city - turret - city city city - turret
       float offset = (float)(GameParameters.MAX_X - GameParameters.GROUND_SPRITE_SPACING) / (float)9;
       int groundSpriteHorizontal = (int)(GameParameters.MIN_Y + GameParameters.GROUND_SPRITE_HEIGHT / 2);
+
+      //clear any existing objects
+      _gameObjectCollection.Clear();
 
       //init three bases, three turrets, each with 10 rounds of ammo
       IGameObject turret1 = _gameObjectFactory.MakeTurret(new Position((int)offset * 0 + GameParameters.GROUND_SPRITE_SPACING, groundSpriteHorizontal));

@@ -1,16 +1,15 @@
 ﻿/* Copyright (c) 2015-2016 Jesse Waite */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace MissileCommand
 {
   /// <summary>
-  /// An object defining a level. This just parses and then exposes level data.
+  /// An object defining a level. This parses and then exposes level data.
+  /// The level is heavy on references to other objects, by which it detects
+  /// and runs level logic. This is because level logic is somewhat arbitrary
+  /// logic, reaching into arbitrary data to 
   /// </summary>
   public class Level
   {

@@ -13,8 +13,9 @@ namespace MissileCommand.Interfaces
     void Interact(IGameObject other);
     //time-based update of internal object state to time t + 1 (after interactions have been executed)
     void Update();
-    //check if another object is a friend
+    //check if another object is a friend of this object type
     bool IsFriend(IGameObject other);
+    
     /// <summary>
     /// Returns the minimum hull distance between an object and some other. Place two spheres next to
     /// eachother: the min hull distance is the distance between their nearest points.

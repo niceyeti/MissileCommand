@@ -1,5 +1,5 @@
-This repo contains the implemenation for a MissileCommand clone using the MonoGame framework. The game is built specifically
-for testing, calibrating, and training of eye tracking devices.
+This repo contains the implementation for a MissileCommand clone using the MonoGame framework. The game is built
+for testing, calibrating, and training of eye tracking devices, but can also be played without an eye tracker.
 
 Repo contents:
   /GameFramework: contains all generic code for the game model. This is a generic, portable, MonoGame-free game model in c#.

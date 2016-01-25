@@ -74,6 +74,14 @@ namespace MissileCommand.EventSystem
       eventQueue.Enqueue(newEvent);
     }
 
+    /// <summary>
+    /// Destroys all pending events in queue. This is used when ending and beginning a new level.
+    /// </summary>
+    public void Clear()
+    {
+      eventQueue.Clear();
+    }
+
     void notifyObservers(EventPacket pendingEvent)
     {
       foreach (IObserver observer in listenerTable[pendingEvent.Type])

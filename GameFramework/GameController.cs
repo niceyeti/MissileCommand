@@ -40,7 +40,7 @@ namespace MissileCommand
       {
         _levels.Add(Environment.CurrentDirectory + "\\Levels\\Level" + i.ToString() + ".xml");
       }
-      _matchManager = new MatchManager(model, _timerQ, _eventFactory, _levels);
+      _matchManager = new MatchManager(model, _timerQ, eventBus, _eventFactory, _levels);
 
       //TODO: setting these could be moved outside this constructor. This object needs no persistent reference to view.
       viewFramework.SetKeyboardInputHandler(OnKeyboardInput);

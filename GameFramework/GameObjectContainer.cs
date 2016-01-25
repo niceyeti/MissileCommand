@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using MissileCommand.Interfaces;
+using MissileCommand.GameObjects;
 
 namespace MissileCommand
 {
@@ -17,9 +18,55 @@ namespace MissileCommand
       idCounter = 0;
     }
 
+    /// <summary>
+    /// Clears all objects in the container, and also notifies their sprites to die.
+    /// </summary>
     public void Clear()
     {
+      if (objects.Count > 0)
+      {
+        //TODO: Should this be moved into the object dtors?
+        //signal any remaining objects' sprites to die
+        GameSpriteUpdateData data = new GameSpriteUpdateData(new Kinematics.Position(), 0.0);
+        data.IsAlive = false;
+        foreach (IGameObject gameObject in objects)
+        {
+          gameObject.MySprite.Update(data);
+        }
+      }
+
       objects.Clear();
+    }
+
+    /// <summary>
+    /// Checks if model contains 
+    /// </summary>
+    /// <param name="objectType"></param>
+    /// <returns></returns>
+    public bool ContainsType(ObjectType objectType)
+    {
+      return objects.Exists(obj => obj.MyType == objectType);
+    }
+
+    //Counts the number of remaining objects of a particular type.
+    public int CountType(ObjectType type)
+    {
+      int count = 0;
+
+      foreach (IGameObject gameObject in objects)
+      {
+        if (gameObject.MyType == type)
+        {
+          count++;
+        }
+      }
+
+      return count;
+    }
+
+    public void CleanDeadObjects()
+    {
+      objects.RemoveAll(obj => obj.Health <= 0);
     }
 
     public void SetObjects(List<IGameObject> objectList)

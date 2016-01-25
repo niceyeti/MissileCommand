@@ -167,12 +167,12 @@ namespace MissileCommand
     /// </summary>
     /// <param name="gameObjects"></param>
     /// <param name="score"></param>
-    public void OnLevelCompletion(List<IGameObject> gameObjects, int score)
+    public void OnLevelCompletion(int remainingCities, int remainingAmmo, int score)
     {
       //TODO: lock the current menu
       _currentMenu = _levelMenu;
       //blocks until menu wakes caller
-      _levelMenu.Show(gameObjects,score);
+      _levelMenu.Show(remainingCities, remainingAmmo, score);
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using MissileCommand.TimedEventQueue;
 using MissileCommand.Interfaces;
 using MissileCommand.GameObjects;
@@ -31,11 +32,12 @@ namespace MissileCommand.Levels
     int _userScore;
     int _pointsPerCity;
     int _pointsPerRemainingShots;
+    EventBus _eventBus;
 
     public LevelCompletionHandler OnLevelCompletion;
     public GameOverHandler OnGameOver;
 
-    public MatchManager(GameModel gameModel, TimerQueue timedQ, EventFactory eventFactory, List<string> levelPaths)
+    public MatchManager(GameModel gameModel, TimerQueue timedQ, EventBus eventBus, EventFactory eventFactory, List<string> levelPaths)
     {
       _pointsPerCity = 100;
       _pointsPerRemainingShots = 10;
@@ -45,6 +47,7 @@ namespace MissileCommand.Levels
       _gameModel = gameModel;
       _levels = new List<Level>();
       _eventFactory = eventFactory;
+      _eventBus = eventBus;
 
       foreach (string path in levelPaths)
       {
@@ -154,14 +157,34 @@ namespace MissileCommand.Levels
       return true;
     }
 
+    int _countRemainingAmmo()
+    { 
+      int ammo = 0;
+
+      foreach (IGameObject gameObject in _gameModel.GetGameObjectList())
+      {
+        if (gameObject.MyType == ObjectType.TURRET)
+        {
+          ammo += ((Turret)gameObject).GetAmmoCount();
+        }
+      }
+
+      return ammo;
+    }
+
     void _onLevelCompletion()
     {
-      _userScore += _getLevelScore(_gameModel.GetGameObjects());
+      _userScore += _getLevelScore(_gameModel.GetGameObjectList());
 
       if (OnLevelCompletion != null)
       {
+        //Level completed, so allow friendly explosions/events to expire
+        _pumpModel();
+
         //Level completed, so notify view to display result, blocking until display has ended.
-        OnLevelCompletion(_gameModel.GetGameObjects(), _userScore);
+        int numCities = _gameModel.CountType(ObjectType.CITY);
+        int numAmmo = _countRemainingAmmo();
+        OnLevelCompletion(numCities, numAmmo, _userScore);
       }
       else
       {
@@ -174,7 +197,7 @@ namespace MissileCommand.Levels
       bool gameOver = false;
 
       //check if the user has reached game-over/game-end
-      if (_isMatchOver(_gameModel.GetGameObjects()))
+      if (_isMatchOver(_gameModel.GetGameObjectList()))
       {
         if (OnGameOver != null)
         {
@@ -212,7 +235,7 @@ namespace MissileCommand.Levels
       bool gameOver = false;
 
       //check the state of the current level
-      if (!_isLevelComplete(_gameModel.GetGameObjects(), _timerQ))
+      if (!_isLevelComplete(_gameModel.GetGameObjectList(), _timerQ))
       {
         //refresh the state of all objects in the model, only if level is in-progress
         _gameModel.Refresh();
@@ -230,6 +253,24 @@ namespace MissileCommand.Levels
     }
 
     /// <summary>
+    /// Pumps model until all friendly explosions have expired. Done
+    /// when inter-level menu is displayed, which is when no enemies exist but
+    /// some friendly actions may remain (primarily explosions).
+    /// </summary>
+    void _pumpModel()
+    {
+      //a faster rate at which to update the game objects, allowing the background events to finish
+      int finishingTickRate = (int)(GameParameters.REFRESH_RATE_MS * 0.50);
+
+      //pump model until no explosions remain
+      while (_gameModel.HasType(ObjectType.AIR_BURST))
+      {
+        Thread.Sleep(finishingTickRate);
+        _gameModel.Refresh();
+      }
+    }
+
+    /// <summary>
     /// GameModel.Initiaize() must be called before this, to make sure required objects exist.
     /// </summary>
     /// <param name="level"></param>
@@ -244,7 +285,7 @@ namespace MissileCommand.Levels
       for (i = 0; i < 5; i++)
       {
         spawnTimeout_ms = RandomNumberGenerator.Instance.Rand() % 1500;
-        EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjects());
+        EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjectList());
         TimedEvent timedMissile = new TimedEvent(spawnTimeout_ms, missileEvent);
         _timerQ.Insert(timedMissile);
       }
@@ -253,7 +294,7 @@ namespace MissileCommand.Levels
       for (i = 0; i < level.NumMissiles; i++)
       {
         spawnTimeout_ms = RandomNumberGenerator.Instance.Rand() % GameParameters.LEVEL_DURATION_MS;
-        EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjects());
+        EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjectList());
         TimedEvent timedMissile = new TimedEvent(spawnTimeout_ms, missileEvent);
         _timerQ.Insert(timedMissile);
       }
@@ -262,7 +303,7 @@ namespace MissileCommand.Levels
       for (i = 0; i < 5; i++)
       {
         spawnTimeout_ms = GameParameters.LEVEL_DURATION_MS + RandomNumberGenerator.Instance.Rand() % 1500;
-        EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjects());
+        EventPacket missileEvent = _eventFactory.MakeRandomSpawnMissileEventPacket(_gameModel.GetGameObjectList());
         TimedEvent timedMissile = new TimedEvent(spawnTimeout_ms, missileEvent);
         _timerQ.Insert(timedMissile);
       }
@@ -271,7 +312,7 @@ namespace MissileCommand.Levels
       for (i = 0; i < level.NumMirvs; i++)
       {
         spawnTimeout_ms = GameParameters.LEVEL_DURATION_MS + 1500 + RandomNumberGenerator.Instance.Rand() % 1500;
-        EventPacket mirvEvent = _eventFactory.MakeRandomSpawnMirvEventPacket(_gameModel.GetGameObjects());
+        EventPacket mirvEvent = _eventFactory.MakeRandomSpawnMirvEventPacket(_gameModel.GetGameObjectList());
         TimedEvent timedMirv = new TimedEvent(spawnTimeout_ms, mirvEvent);
         _timerQ.Insert(timedMirv);
       }
@@ -297,6 +338,9 @@ namespace MissileCommand.Levels
 
     void _loadLevel(Level level)
     {
+      //clear any pending events
+      _eventBus.Clear();
+
       _currentLevel = level;
       _gameModel.Initialize();
       _initializeTimedEventQ(_currentLevel);

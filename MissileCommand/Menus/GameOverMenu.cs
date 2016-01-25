@@ -22,7 +22,6 @@ namespace MissileCommand.Menus
     bool _shown;
     int _userScore;
     bool _userWon;
-    double _intensity;
     double _elapsed_ms;
     double _scalar;
     double _maxRadius = ((double)GameParameters.MAX_X) * 0.7;
@@ -30,18 +29,16 @@ namespace MissileCommand.Menus
     double _duration_ms;
     string _resourcePath;
     SpriteLoaderFlyweight _textureLoader;
-    SpriteFont _font;
     ViewSpriteFactory _spriteFactory;
-    bool _once;
     List<ExplosionSprite> _explosionSprites;
     string _bannerFontPath;
     string _buttonFontPath;
     Point _clickPosition;
-    bool _clickReceived;
     bool _runningAnimation;
     bool _getUserInfo;
     AutoResetEvent _waitHandle;
     bool _retry;
+    bool _clickReceived;
 
     public GameOverMenu(SpriteLoaderFlyweight textureLoader, ViewSpriteFactory spriteFactory, string bannerFontPath, string buttonFontPath)
     {
@@ -49,7 +46,6 @@ namespace MissileCommand.Menus
       _explosionSprites = new List<ExplosionSprite>();
       _elapsed_ms = 0;
       _shown = false;
-      _once = true;
       _runningAnimation = true;
       _getUserInfo = false;
       _textureLoader = textureLoader;

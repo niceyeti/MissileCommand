@@ -12,6 +12,8 @@ namespace MissileCommand.Menus
   {
     bool _isShown;
     int _levelScore;
+    int _remainingCities;
+    int _remainingAmmo;
     string _scoreFont;
     ViewSpriteFactory _viewSpriteFactory;
     SpriteLoaderFlyweight _textureLoader;
@@ -27,7 +29,7 @@ namespace MissileCommand.Menus
       _scoreFont = scoreFont;
       _viewSpriteFactory = spriteFactory;
       _textureLoader = textureLoader;
-      _waitHandle = new AutoResetEvent(true);
+      _waitHandle = new AutoResetEvent(false);
     }
 
     public bool IsShown()
@@ -35,13 +37,22 @@ namespace MissileCommand.Menus
       return _isShown;
     }
 
-    public void Show(List<IGameObject> gameObjects, int score)
+    public void Show(int remainingCities, int remainingAmmo, int score)
     {
       _levelScore = score;
+      _remainingCities = remainingCities;
+      _remainingAmmo = remainingAmmo;
       _startTime = DateTime.Now;
       _isShown = true;
+
       Console.WriteLine("Model blocked, waiting for level completion menu to return...");
       _waitHandle.WaitOne();
+    }
+
+    void _drawAnimation(SpriteBatch spriteBatch, ContentManager contentManager, int elapsed_ms)
+    {
+      SpriteFont font = contentManager.Load<SpriteFont>(_scoreFont);
+      spriteBatch.DrawString(font, "LEVEL SCORE    " + _levelScore.ToString(), new Vector2(200, 200), Color.Green);
     }
 
     public void Draw(SpriteBatch spriteBatch, ContentManager contentManager)
@@ -51,8 +62,7 @@ namespace MissileCommand.Menus
       //display the score (this is raw)
       if (elapsed_ms < _showtime_ms)
       {
-        SpriteFont font = contentManager.Load<SpriteFont>(_scoreFont);
-        spriteBatch.DrawString(font, "SCORE: "+_levelScore.ToString(), new Vector2(200, 200), Color.Green);
+        _drawAnimation(spriteBatch,contentManager,elapsed_ms);
       }
       else
       {
@@ -66,7 +76,7 @@ namespace MissileCommand.Menus
     {
       //TODO: Get rid of this
 
-      //do nothing, just pass-through. This function is just an interface requirement, and likely go away
+      //do nothing, just pass-through. This function is just an interface requirement, and likely to go away
     }
   }
 }

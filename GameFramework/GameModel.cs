@@ -23,7 +23,7 @@ namespace MissileCommand
   //The passive model for the game (update rules, score, levels, etc)
   public class GameModel
   {
-    public GameModel(GameObjectContainer objects, EventBus eventSys, GameObjectFactory objectFactory)
+    public GameModel(GameObjectContainer objects, GameObjectFactory objectFactory)
     {
       _minSeparation = GameParameters.MIN_SEPARATION_HEURISTIC_VALUE;
       _gameObjectFactory = objectFactory;
@@ -39,10 +39,26 @@ namespace MissileCommand
     /// </summary>
     /// 
     /// <returns></returns>
-   public List<IGameObject> GetGameObjects()
+   public List<IGameObject> GetGameObjectList()
    {
      return _gameObjectCollection.ToList();
    }
+
+
+    /// <summary>
+    /// Checks if model contains any objects of a specific type.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+   public bool HasType(ObjectType type)
+   {
+     return _gameObjectCollection.ContainsType(type);
+   }
+
+    public int CountType(ObjectType type)
+    {
+      return _gameObjectCollection.CountType(type);
+    }
 
     /// <summary>
     /// 
@@ -69,7 +85,7 @@ namespace MissileCommand
 
       //clear any existing objects
       _gameObjectCollection.Clear();
-
+      
       //init three bases, three turrets, each with 10 rounds of ammo
       IGameObject turret1 = _gameObjectFactory.MakeTurret(new Position((int)offset * 0 + GameParameters.GROUND_SPRITE_SPACING, groundSpriteHorizontal));
       IGameObject turret2 = _gameObjectFactory.MakeTurret(new Position((int)offset * 4 + GameParameters.GROUND_SPRITE_SPACING, groundSpriteHorizontal));
@@ -99,7 +115,8 @@ namespace MissileCommand
       //Console.WriteLine("before clean |objs|=" + IGameObjectCollection.Size());
       //removes all expired objects
       //TODO: clean this. It creates an entire new list and substitutes it with the old one
-      _gameObjectCollection.SetObjects(_gameObjectCollection.ToList().Where(obj => obj.Health > 0).ToList());
+      _gameObjectCollection.CleanDeadObjects();
+      //_gameObjectCollection.SetObjects(_gameObjectCollection.ToList().Where(obj => obj.Health > 0).ToList());
       //TODO garbage collect
       //Console.WriteLine("after clean |objs|=" + IGameObjectCollection.Size());
     }

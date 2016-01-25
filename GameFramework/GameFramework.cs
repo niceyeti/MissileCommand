@@ -68,7 +68,7 @@ namespace MissileCommand
       GameObjectFactory gameObjectFactory = new GameObjectFactory(eventMonitor, _viewFramework.GetIGameSpriteFactory());
       GameObjectContainer gameObjects = new GameObjectContainer();
       MainEventProcessor mainEventListener = new MainEventProcessor(gameObjects, gameObjectFactory, eventBus);
-      GameModel gameModel = new GameModel(gameObjects, eventBus, gameObjectFactory);
+      GameModel gameModel = new GameModel(gameObjects, gameObjectFactory);
       GameController gameController = new GameController(eventBus, gameModel, eventFactory, _viewFramework);
 
       //controller runs forever-loop
